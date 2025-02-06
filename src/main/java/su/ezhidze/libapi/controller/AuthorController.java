@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import su.ezhidze.libapi.dto.AuthorDto;
 import su.ezhidze.libapi.entity.Author;
 import su.ezhidze.libapi.entity.Book;
+import su.ezhidze.libapi.exception.ExceptionBodyBuilder;
 import su.ezhidze.libapi.service.AuthorService;
 
 import java.util.Set;
@@ -23,60 +24,86 @@ public class AuthorController {
     }
 
     @PostMapping
-    public ResponseEntity<AuthorDto> createAuthor(@Valid @RequestBody AuthorDto authorDto) {
-        Author author = convertDtoToAuthor(authorDto);
-        Author saved = authorService.addAuthor(author);
-        return new ResponseEntity<>(convertAuthorToDto(saved), HttpStatus.CREATED);
+    public ResponseEntity createAuthor(@Valid @RequestBody AuthorDto authorDto) {
+        try {
+            Author author = convertDtoToAuthor(authorDto);
+            Author saved = authorService.addAuthor(author);
+            return new ResponseEntity<>(convertAuthorToDto(saved), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorDto> getAuthorById(@PathVariable Long id) {
-        Author author = authorService.getAuthorById(id);
-        return ResponseEntity.ok(convertAuthorToDto(author));
+    public ResponseEntity getAuthorById(@PathVariable Long id) {
+        try {
+            Author author = authorService.getAuthorById(id);
+            return ResponseEntity.ok(convertAuthorToDto(author));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+        }
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<AuthorDto> getAuthorByName(@PathVariable String name) {
-        Author author = authorService.getAuthorByName(name);
-        return ResponseEntity.ok(convertAuthorToDto(author));
+    public ResponseEntity getAuthorByName(@PathVariable String name) {
+        try {
+            Author author = authorService.getAuthorByName(name);
+            return ResponseEntity.ok(convertAuthorToDto(author));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AuthorDto> updateAuthor(@PathVariable Long id,
-                                                  @Valid @RequestBody AuthorDto authorDto) {
-        Author updated = authorService.updateAuthor(id, convertDtoToAuthor(authorDto));
-        return ResponseEntity.ok(convertAuthorToDto(updated));
+    public ResponseEntity updateAuthor(@PathVariable Long id, @Valid @RequestBody AuthorDto authorDto) {
+        try {
+            Author updated = authorService.updateAuthor(id, convertDtoToAuthor(authorDto));
+            return ResponseEntity.ok(convertAuthorToDto(updated));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAuthor(@PathVariable Long id) {
-        authorService.deleteAuthor(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity deleteAuthor(@PathVariable Long id) {
+        try {
+            authorService.deleteAuthor(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+        }
     }
 
     @GetMapping("/{id}/books")
-    public ResponseEntity<Set<Long>> getBooksByAuthor(@PathVariable Long id) {
-        Set<Book> books = authorService.getBooksByAuthor(id);
-        Set<Long> bookIds = books.stream()
-                .map(Book::getId)
-                .collect(Collectors.toSet());
-        return ResponseEntity.ok(bookIds);
+    public ResponseEntity getBooksByAuthor(@PathVariable Long id) {
+        try {
+            Set<Book> books = authorService.getBooksByAuthor(id);
+            Set<Long> bookIds = books.stream().map(Book::getId).collect(Collectors.toSet());
+            return ResponseEntity.ok(bookIds);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+        }
     }
 
     @PostMapping("/{authorId}/books/{bookId}")
-    public ResponseEntity<AuthorDto> addBookToAuthor(@PathVariable Long authorId,
-                                                     @PathVariable Long bookId) {
-        Author author = authorService.addBookToAuthor(authorId, bookId);
-        return ResponseEntity.ok(convertAuthorToDto(author));
+    public ResponseEntity addBookToAuthor(@PathVariable Long authorId, @PathVariable Long bookId) {
+        try {
+            Author author = authorService.addBookToAuthor(authorId, bookId);
+            return ResponseEntity.ok(convertAuthorToDto(author));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{authorId}/books/{bookId}")
-    public ResponseEntity<AuthorDto> removeBookFromAuthor(@PathVariable Long authorId,
-                                                          @PathVariable Long bookId) {
-        Author author = authorService.removeBookFromAuthor(authorId, bookId);
-        return ResponseEntity.ok(convertAuthorToDto(author));
+    public ResponseEntity removeBookFromAuthor(@PathVariable Long authorId, @PathVariable Long bookId) {
+        try {
+            Author author = authorService.removeBookFromAuthor(authorId, bookId);
+            return ResponseEntity.ok(convertAuthorToDto(author));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+        }
     }
-
 
     private AuthorDto convertAuthorToDto(Author author) {
         Set<Long> bookIds = author.getBooks().stream()
