@@ -1,5 +1,6 @@
 package su.ezhidze.libapi.service;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,12 +20,19 @@ public class AuthorService {
 
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
+    private final BookService bookService;
 
     @Autowired
     public AuthorService(AuthorRepository authorRepository,
-                         BookRepository bookRepository) {
+                         BookRepository bookRepository, BookService bookService) {
         this.authorRepository = authorRepository;
         this.bookRepository = bookRepository;
+        this.bookService = bookService;
+    }
+
+    @PostConstruct
+    public void init() {
+        bookService.setAuthorService(this);
     }
 
     public Author addAuthor(Author author) {
@@ -65,6 +73,7 @@ public class AuthorService {
 
     public void deleteAuthor(Long id) {
         Author author = getAuthorById(id);
+        for (Book book : author.getBooks()) bookService.removeAuthorFromBook(book.getId(), id);
         authorRepository.delete(author);
     }
 
@@ -91,6 +100,6 @@ public class AuthorService {
         author.getBooks().remove(book);
         book.getAuthors().remove(author);
         bookRepository.save(book);
-        return author;
+        return authorRepository.save(author);
     }
 }

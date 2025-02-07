@@ -1,8 +1,10 @@
 package su.ezhidze.libapi.service;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import su.ezhidze.libapi.entity.Author;
 import su.ezhidze.libapi.entity.Publisher;
 import su.ezhidze.libapi.entity.Book;
 import su.ezhidze.libapi.exception.BadArgumentException;
@@ -19,12 +21,21 @@ public class PublisherService {
 
     private final PublisherRepository publisherRepository;
     private final BookRepository bookRepository;
+    private final BookService bookService;
+    private final AuthorService authorService;
 
     @Autowired
     public PublisherService(PublisherRepository publisherRepository,
-                            BookRepository bookRepository) {
+                            BookRepository bookRepository, BookService bookService, AuthorService authorService) {
         this.publisherRepository = publisherRepository;
         this.bookRepository = bookRepository;
+        this.bookService = bookService;
+        this.authorService = authorService;
+    }
+
+    @PostConstruct
+    public void init() {
+        bookService.setPublisherService(this);
     }
 
     public Publisher addPublisher(Publisher publisher) {
@@ -65,6 +76,11 @@ public class PublisherService {
 
     public void deletePublisher(Long id) {
         Publisher publisher = getPublisherById(id);
+        for (Book book : publisher.getBooks()) {
+            for (Author author : book.getAuthors()) {
+                authorService.removeBookFromAuthor(author.getId(), book.getId());
+            }
+        }
         publisherRepository.delete(publisher);
     }
 

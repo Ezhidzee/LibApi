@@ -1,5 +1,6 @@
 package su.ezhidze.libapi.service;
 
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +21,16 @@ import java.util.Set;
 public class BookService {
 
     private final BookRepository bookRepository;
+
     private final AuthorRepository authorRepository;
+
     private final PublisherRepository publisherRepository;
+
+    @Setter
+    private PublisherService publisherService;
+
+    @Setter
+    private AuthorService authorService;
 
     @Autowired
     public BookService(BookRepository bookRepository,
@@ -33,7 +42,6 @@ public class BookService {
     }
 
     public Book addBook(Book book) {
-        // Если ISBN должен быть уникальным
         if (book.getIsbn() != null && bookRepository.findByIsbn(book.getIsbn()) != null) {
             throw new DuplicateEntryException("Book with ISBN " + book.getIsbn() + " already exists");
         }
@@ -90,7 +98,9 @@ public class BookService {
 
     public void deleteBook(Long id) {
         Book book = getBookById(id);
-        bookRepository.delete(book);
+        for (Author author : book.getAuthors()) authorService.removeBookFromAuthor(author.getId(), id);
+        if (book.getPublisher() != null) publisherService.removeBookFromPublisher(book.getPublisher().getId(), book.getId());
+        bookRepository.delete(getBookById(id));
     }
 
     public Book addAuthorToBook(Long bookId, Long authorId) {
