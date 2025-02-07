@@ -27,7 +27,7 @@ public class PublisherController {
     public ResponseEntity createPublisher(@Valid @RequestBody PublisherDto publisherDto) {
         try {
             Publisher publisher = convertDtoToPublisher(publisherDto);
-            Publisher saved = publisherService.addPublisher(publisher);
+            Publisher saved = publisherService.create(publisher);
             return new ResponseEntity<>(convertPublisherToDto(saved), HttpStatus.CREATED);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
@@ -37,7 +37,7 @@ public class PublisherController {
     @GetMapping("/{id}")
     public ResponseEntity getPublisherById(@PathVariable Long id) {
         try {
-            Publisher publisher = publisherService.getPublisherById(id);
+            Publisher publisher = publisherService.read(id);
             return ResponseEntity.ok(convertPublisherToDto(publisher));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
@@ -58,7 +58,7 @@ public class PublisherController {
     public ResponseEntity updatePublisher(@PathVariable Long id, @Valid @RequestBody PublisherDto publisherDto) {
         try {
             Publisher publisher = convertDtoToPublisher(publisherDto);
-            Publisher updated = publisherService.updatePublisher(id, publisher);
+            Publisher updated = publisherService.update(id, publisher);
             return ResponseEntity.ok(convertPublisherToDto(updated));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
@@ -68,7 +68,7 @@ public class PublisherController {
     @DeleteMapping("/{id}")
     public ResponseEntity deletePublisher(@PathVariable Long id) {
         try {
-            publisherService.deletePublisher(id);
+            publisherService.delete(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));

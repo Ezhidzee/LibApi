@@ -16,10 +16,12 @@ import java.util.Set;
 
 @Service
 @Transactional
-public class AuthorService {
+public class AuthorService implements IService<Author> {
 
     private final AuthorRepository authorRepository;
+
     private final BookRepository bookRepository;
+
     private final BookService bookService;
 
     @Autowired
@@ -35,14 +37,16 @@ public class AuthorService {
         bookService.setAuthorService(this);
     }
 
-    public Author addAuthor(Author author) {
+    @Override
+    public Author create(Author author) {
         if (author.getName() != null && authorRepository.findByName(author.getName()) != null) {
             throw new DuplicateEntryException("Author with name " + author.getName() + " already exists");
         }
         return authorRepository.save(author);
     }
 
-    public Author getAuthorById(Long id) {
+    @Override
+    public Author read(Long id) {
         return authorRepository.findById(id)
                 .orElseThrow(() -> new RecordNotFoundException("Author with id " + id + " not found"));
     }
@@ -56,12 +60,13 @@ public class AuthorService {
     }
 
     public Set<Book> getBooksByAuthor(Long authorId) {
-        Author author = getAuthorById(authorId);
+        Author author = read(authorId);
         return author.getBooks();
     }
 
-    public Author updateAuthor(Long id, Author updatedAuthor) {
-        Author existingAuthor = getAuthorById(id);
+    @Override
+    public Author update(Long id, Author updatedAuthor) {
+        Author existingAuthor = read(id);
         if (updatedAuthor.getName() != null && !updatedAuthor.getName().isBlank()) {
             existingAuthor.setName(updatedAuthor.getName());
         }
@@ -71,14 +76,15 @@ public class AuthorService {
         return authorRepository.save(existingAuthor);
     }
 
-    public void deleteAuthor(Long id) {
-        Author author = getAuthorById(id);
+    @Override
+    public void delete(Long id) {
+        Author author = read(id);
         for (Book book : author.getBooks()) bookService.removeAuthorFromBook(book.getId(), id);
         authorRepository.delete(author);
     }
 
     public Author addBookToAuthor(Long authorId, Long bookId) {
-        Author author = getAuthorById(authorId);
+        Author author = read(authorId);
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RecordNotFoundException("Book with id " + bookId + " not found"));
         if (author.getBooks().contains(book)) {
@@ -91,7 +97,7 @@ public class AuthorService {
     }
 
     public Author removeBookFromAuthor(Long authorId, Long bookId) {
-        Author author = getAuthorById(authorId);
+        Author author = read(authorId);
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RecordNotFoundException("Book with id " + bookId + " not found"));
         if (!author.getBooks().contains(book)) {

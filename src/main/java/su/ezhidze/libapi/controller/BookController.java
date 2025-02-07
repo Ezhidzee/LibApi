@@ -27,7 +27,7 @@ public class BookController {
     public ResponseEntity createBook(@Valid @RequestBody BookDto bookDto) {
         try {
             Book book = convertDtoToBook(bookDto);
-            Book saved = bookService.addBook(book);
+            Book saved = bookService.create(book);
             return new ResponseEntity<>(convertBookToDto(saved), HttpStatus.CREATED);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
@@ -37,7 +37,7 @@ public class BookController {
     @GetMapping("/{id}")
     public ResponseEntity getBookById(@PathVariable Long id) {
         try {
-            Book book = bookService.getBookById(id);
+            Book book = bookService.read(id);
             return ResponseEntity.ok(convertBookToDto(book));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
@@ -58,7 +58,7 @@ public class BookController {
     public ResponseEntity updateBook(@PathVariable Long id, @Valid @RequestBody BookDto bookDto) {
         try {
             Book book = convertDtoToBook(bookDto);
-            Book updated = bookService.updateBook(id, book);
+            Book updated = bookService.update(id, book);
             return ResponseEntity.ok(convertBookToDto(updated));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
@@ -68,7 +68,7 @@ public class BookController {
     @DeleteMapping("/{id}")
     public ResponseEntity deleteBook(@PathVariable Long id) {
         try {
-            bookService.deleteBook(id);
+            bookService.delete(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));

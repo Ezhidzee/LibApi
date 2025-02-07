@@ -27,7 +27,7 @@ public class AuthorController {
     public ResponseEntity createAuthor(@Valid @RequestBody AuthorDto authorDto) {
         try {
             Author author = convertDtoToAuthor(authorDto);
-            Author saved = authorService.addAuthor(author);
+            Author saved = authorService.create(author);
             return new ResponseEntity<>(convertAuthorToDto(saved), HttpStatus.CREATED);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
@@ -37,7 +37,7 @@ public class AuthorController {
     @GetMapping("/{id}")
     public ResponseEntity getAuthorById(@PathVariable Long id) {
         try {
-            Author author = authorService.getAuthorById(id);
+            Author author = authorService.read(id);
             return ResponseEntity.ok(convertAuthorToDto(author));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
@@ -57,7 +57,7 @@ public class AuthorController {
     @PutMapping("/{id}")
     public ResponseEntity updateAuthor(@PathVariable Long id, @Valid @RequestBody AuthorDto authorDto) {
         try {
-            Author updated = authorService.updateAuthor(id, convertDtoToAuthor(authorDto));
+            Author updated = authorService.update(id, convertDtoToAuthor(authorDto));
             return ResponseEntity.ok(convertAuthorToDto(updated));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
@@ -67,7 +67,7 @@ public class AuthorController {
     @DeleteMapping("/{id}")
     public ResponseEntity deleteAuthor(@PathVariable Long id) {
         try {
-            authorService.deleteAuthor(id);
+            authorService.delete(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionBodyBuilder.build(HttpStatus.BAD_REQUEST.value(), e.getMessage()));

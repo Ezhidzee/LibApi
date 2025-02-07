@@ -4,21 +4,21 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import su.ezhidze.libapi.entity.Book;
 import su.ezhidze.libapi.entity.Author;
+import su.ezhidze.libapi.entity.Book;
 import su.ezhidze.libapi.entity.Publisher;
 import su.ezhidze.libapi.exception.BadArgumentException;
 import su.ezhidze.libapi.exception.DuplicateEntryException;
 import su.ezhidze.libapi.exception.RecordNotFoundException;
-import su.ezhidze.libapi.repository.BookRepository;
 import su.ezhidze.libapi.repository.AuthorRepository;
+import su.ezhidze.libapi.repository.BookRepository;
 import su.ezhidze.libapi.repository.PublisherRepository;
 
 import java.util.Set;
 
 @Service
 @Transactional
-public class BookService {
+public class BookService implements IService<Book> {
 
     private final BookRepository bookRepository;
 
@@ -41,14 +41,16 @@ public class BookService {
         this.publisherRepository = publisherRepository;
     }
 
-    public Book addBook(Book book) {
+    @Override
+    public Book create(Book book) {
         if (book.getIsbn() != null && bookRepository.findByIsbn(book.getIsbn()) != null) {
             throw new DuplicateEntryException("Book with ISBN " + book.getIsbn() + " already exists");
         }
         return bookRepository.save(book);
     }
 
-    public Book getBookById(Long id) {
+    @Override
+    public Book read(Long id) {
         return bookRepository.findById(id)
                 .orElseThrow(() -> new RecordNotFoundException("Book with id " + id + " not found"));
     }
@@ -62,12 +64,12 @@ public class BookService {
     }
 
     public Set<Author> getBookAuthors(Long bookId) {
-        Book book = getBookById(bookId);
+        Book book = read(bookId);
         return book.getAuthors();
     }
 
     public Book setPublisher(Long bookId, Long publisherId) {
-        Book book = getBookById(bookId);
+        Book book = read(bookId);
         Publisher publisher = publisherRepository.findById(publisherId)
                 .orElseThrow(() -> new RecordNotFoundException("Publisher with id " + publisherId + " not found"));
         if (book.getPublisher() != null) {
@@ -78,8 +80,9 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public Book updateBook(Long id, Book updatedBook) {
-        Book existingBook = getBookById(id);
+    @Override
+    public Book update(Long id, Book updatedBook) {
+        Book existingBook = read(id);
         if (updatedBook.getTitle() != null && !updatedBook.getTitle().isBlank()) {
             existingBook.setTitle(updatedBook.getTitle());
         }
@@ -96,15 +99,17 @@ public class BookService {
         return bookRepository.save(existingBook);
     }
 
-    public void deleteBook(Long id) {
-        Book book = getBookById(id);
+    @Override
+    public void delete(Long id) {
+        Book book = read(id);
         for (Author author : book.getAuthors()) authorService.removeBookFromAuthor(author.getId(), id);
-        if (book.getPublisher() != null) publisherService.removeBookFromPublisher(book.getPublisher().getId(), book.getId());
-        bookRepository.delete(getBookById(id));
+        if (book.getPublisher() != null)
+            publisherService.removeBookFromPublisher(book.getPublisher().getId(), book.getId());
+        bookRepository.delete(read(id));
     }
 
     public Book addAuthorToBook(Long bookId, Long authorId) {
-        Book book = getBookById(bookId);
+        Book book = read(bookId);
         Author author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new RecordNotFoundException("Author with id " + authorId + " not found"));
         if (book.getAuthors().contains(author)) {
@@ -116,7 +121,7 @@ public class BookService {
     }
 
     public Book removeAuthorFromBook(Long bookId, Long authorId) {
-        Book book = getBookById(bookId);
+        Book book = read(bookId);
         Author author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new RecordNotFoundException("Author with id " + authorId + " not found"));
         if (!book.getAuthors().contains(author)) {
