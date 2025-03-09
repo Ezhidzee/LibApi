@@ -83,10 +83,12 @@ public class PublisherService implements IService<Publisher> {
     @Override
     public void delete(Long id) {
         Publisher publisher = read(id);
+
         for (Book book : publisher.getBooks()) {
-            for (Author author : book.getAuthors()) {
-                authorService.removeBookFromAuthor(author.getId(), book.getId());
-            }
+//            for (Author author : book.getAuthors()) {
+//                authorService.removeBookFromAuthor(author.getId(), book.getId());
+//            }
+            book.setPublisher(null);
         }
         publisherRepository.delete(publisher);
     }

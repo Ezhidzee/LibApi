@@ -358,34 +358,6 @@ class LibapiApplicationTests {
     }
 
     @Test
-    public void testDeleteBookByDeletingThePublisher() {
-        Publisher publisher = new Publisher();
-        Book book = new Book();
-        Book savedBook = bookService.create(book);
-        Long bookId = savedBook.getId();
-        Publisher savedPublisher = publisherService.create(publisher);
-        publisherService.addBookToPublisher(savedPublisher.getId(), savedBook.getId());
-        publisherService.delete(savedPublisher.getId());
-        assertThrows(RecordNotFoundException.class, () -> bookService.read(bookId));
-    }
-
-    @Test
-    public void testRemoveBookFromAuthorByDeletingThePublisher() {
-        Publisher publisher = new Publisher();
-        Book book = new Book();
-        Book savedBook = bookService.create(book);
-        Long bookId = savedBook.getId();
-        Publisher savedPublisher = publisherService.create(publisher);
-        Author author = new Author();
-        Author savedAuthor = authorService.create(author);
-        publisherService.addBookToPublisher(savedPublisher.getId(), savedBook.getId());
-        authorService.addBookToAuthor(author.getId(), savedBook.getId());
-        publisherService.delete(savedPublisher.getId());
-        assertThrows(RecordNotFoundException.class, () -> bookService.read(bookId));
-        assertTrue(savedAuthor.getBooks().isEmpty());
-    }
-
-    @Test
     public void testRemoveBookFromPublisherByDeletingTheBook() {
         Publisher publisher = new Publisher();
         Book book = new Book();
@@ -395,29 +367,6 @@ class LibapiApplicationTests {
         assertTrue(savedPublisher.getBooks().contains(savedBook));
         bookService.delete(savedBook.getId());
         assertFalse(savedPublisher.getBooks().contains(savedBook));
-    }
-
-    @Test
-    public void testDeletePublisherWithBooks() {
-        Book book1 = new Book();
-        Book book2 = new Book();
-        Publisher publisher = new Publisher();
-        Author author = new Author();
-        Book savedBook1 = bookService.create(book1);
-        Book savedBook2 = bookService.create(book2);
-        Publisher savedPublisher = publisherService.create(publisher);
-        Author savedAuthor = authorService.create(author);
-        authorService.addBookToAuthor(savedAuthor.getId(), savedBook1.getId());
-        authorService.addBookToAuthor(savedAuthor.getId(), savedBook2.getId());
-        publisherService.addBookToPublisher(savedPublisher.getId(), savedBook1.getId());
-        publisherService.addBookToPublisher(savedPublisher.getId(), savedBook2.getId());
-        Long id1 = savedBook1.getId(), id2 = savedBook2.getId();
-        assertDoesNotThrow(() -> bookService.read(id1));
-        assertDoesNotThrow(() -> bookService.read(id2));
-        publisherService.delete(savedPublisher.getId());
-        assertThrows(RecordNotFoundException.class, () -> bookService.read(id1));
-        assertThrows(RecordNotFoundException.class, () -> bookService.read(id2));
-        assertTrue(authorService.read(savedAuthor.getId()).getBooks().isEmpty());
     }
 
 }

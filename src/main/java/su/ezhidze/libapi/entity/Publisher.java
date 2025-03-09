@@ -20,6 +20,6 @@ public class Publisher {
 
     private String address;
 
-    @OneToMany(mappedBy = "publisher", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "publisher")
     private Set<Book> books = new HashSet<>();
 }
