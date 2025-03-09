@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>su.ezhidze</groupId>
-	<artifactId>libapi</artifactId>
+	<artifactId>LibApi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>libapi</name>
+	<name>LibApi</name>
 	<description>Library api</description>
 	<url/>
 	<licenses>

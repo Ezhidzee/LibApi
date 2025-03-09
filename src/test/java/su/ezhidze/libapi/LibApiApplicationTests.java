@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
 @Transactional
-class LibapiApplicationTests {
+class LibApiApplicationTests {
 
     @Autowired
     private BookService bookService;
